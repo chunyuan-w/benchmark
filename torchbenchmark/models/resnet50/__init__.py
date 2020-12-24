@@ -10,7 +10,7 @@ class Model:
         self.jit = jit
         self.model = models.resnet50()
         if self.jit:
-            self.model = torch.jit.script(self.model)
+            self.model = torch.jit.trace(self.model.eval(), torch.randn(1, 3, 224, 224))
         self.example_inputs = (torch.randn((32, 3, 224, 224)),)
 
     def get_module(self):
