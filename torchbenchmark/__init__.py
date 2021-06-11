@@ -48,6 +48,9 @@ def list_models():
     models = []
     for model_path in _list_model_paths():
         model_name = os.path.basename(model_path)
+        print(model_name)
+        if model_name in ["maskrcnn_benchmark", "pytorch_struct"]:
+            continue
         module = importlib.import_module(f'.models.{model_name}', package=__name__)
         Model = getattr(module, 'Model')
         if not hasattr(Model, 'name'):
