@@ -20,8 +20,9 @@ def set_fuser(fuser):
         torch._C._jit_override_can_fuse_on_gpu(True)
         torch._C._jit_set_texpr_fuser_enabled(True)
     elif fuser == "llga":
-        torch._C._jit_set_profiling_executor(False)
-        torch._C._jit_set_profiling_mode(False)
+        torch._C._jit_set_profiling_executor(True)
+        torch._C._jit_set_profiling_mode(True)
+        torch._C._jit_set_texpr_fuser_enabled(True)
         torch._C._jit_set_llga_enabled(True)
 
 def pytest_configure(config):
