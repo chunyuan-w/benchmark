@@ -247,9 +247,9 @@ class ModelTask(base_task.TaskBase):
 
     @base_task.run_in_worker(scoped=True)
     @staticmethod
-    def make_model_instance(device: str, jit: bool) -> None:
+    def make_model_instance(device: str, jit: bool, fuser: str) -> None:
         Model = globals()["Model"]
-        model = Model(device=device, jit=jit)
+        model = Model(device=device, jit=jit, fuser=fuser)
 
         import gc
         gc.collect()

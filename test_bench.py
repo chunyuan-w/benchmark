@@ -68,7 +68,7 @@ class TestBenchNetwork:
             if not task.model_details.exists:
                 return  # Model is not supported.
 
-            task.make_model_instance(device=device, jit=(compiler == 'jit'))
+            task.make_model_instance(device=device, jit=(compiler == 'jit'), fuser=pytestconfig.getoption("fuser"))
 
             with task.no_grad(disable_nograd=pytestconfig.getoption("disable_nograd")):
                 task.set_eval()
