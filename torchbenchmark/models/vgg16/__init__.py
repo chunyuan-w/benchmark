@@ -15,7 +15,7 @@ from torchbenchmark.tasks import COMPUTER_VISION
 class Model(BenchmarkModel):
     task = COMPUTER_VISION.CLASSIFICATION
     optimized_for_inference = True
-    def __init__(self, device=None, jit=False, fuser="", train_bs=8, eval_bs=4):
+    def __init__(self, device=None, jit=False, fuser="", train_bs=8, eval_bs=1):
         super().__init__()
         self.device = device
         self.jit = jit
@@ -26,9 +26,14 @@ class Model(BenchmarkModel):
 
         if self.jit:
             if fuser == "llga":
-                self.model = torch.jit.trace(self.model, self.example_inputs)
-                self.eval_model = torch.jit.trace(self.eval_model, self.example_inputs)
-                self.eval_model.eval()
+                torch.jit.enable_onednn_fusion(True)
+                with torch.no_grad():
+                    self.model = torch.jit.trace(self.model, self.example_inputs)
+                    self.eval_model.eval()
+                    self.eval_model = torch.jit.trace(self.eval_model, self.infer_example_inputs)
+                    # warm up
+                    self.eval_model(*self.infer_example_inputs)
+                    self.eval_model(*self.infer_example_inputs)                    
             else:
                 if hasattr(torch.jit, '_script_pdt'):
                     self.model = torch.jit._script_pdt(self.model, example_inputs=[self.example_inputs, ])
@@ -62,10 +67,11 @@ class Model(BenchmarkModel):
             optimizer.step()
 
     def eval(self, niter=1):
-        model = self.eval_model
-        example_inputs = self.infer_example_inputs
-        for i in range(niter):
-            model(*example_inputs)
+        with torch.no_grad():
+            model = self.eval_model
+            example_inputs = self.infer_example_inputs
+            for i in range(niter):
+                model(*example_inputs)
 
 
 if __name__ == "__main__":

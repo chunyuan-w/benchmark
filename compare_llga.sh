@@ -11,5 +11,7 @@ test_bench.py::TestBenchNetwork::test_eval[alexnet-cpu-jit]"
 pytest --ignore_machine_config $models --cpu_only --benchmark-json nollga.json
 pytest --ignore_machine_config $models --fuser llga --cpu_only --benchmark-json llga.json
 python compare.py nollga.json llga.json
-# pytest --ignore_machine_config test_bench.py -k test_eval[alexnet-cpu-jit] --fuser llga --cpu_only --benchmark-json nollga.json
-# pytest --ignore_machine_config test_bench.py -k test_eval[alexnet-cpu-jit] --cpu_only --benchmark-json nollga.json
+
+# pytest --ignore_machine_config test_bench.py -k test_eval[resnet50-cpu-jit] --cpu_only --benchmark-json nollga_single_model.json
+# pytest --ignore_machine_config test_bench.py -k test_eval[resnet50-cpu-jit] --fuser llga --cpu_only --benchmark-json llga_single_model.json
+# python compare.py nollga_single_model.json llga_single_model.json

@@ -21,13 +21,18 @@ class Model(BenchmarkModel):
         self.jit = jit
         self.model = models.densenet121().to(self.device)
         self.eval_model = models.densenet121().to(self.device)
-        self.example_inputs = (torch.randn((64, 3, 224, 224)).to(self.device),)
+        self.example_inputs = (torch.randn((1, 3, 224, 224)).to(self.device),)
 
         if self.jit:
             if fuser == "llga":
-                self.model = torch.jit.trace(self.model, self.example_inputs)
-                self.eval_model = torch.jit.trace(self.eval_model, self.example_inputs)
-                self.eval_model.eval()
+                torch.jit.enable_onednn_fusion(True)
+                with torch.no_grad():
+                    self.model = torch.jit.trace(self.model, self.example_inputs)
+                    self.eval_model.eval()
+                    self.eval_model = torch.jit.trace(self.eval_model, self.example_inputs)
+                    # warm up
+                    self.eval_model(*self.example_inputs)
+                    self.eval_model(*self.example_inputs)
             else:
                 if hasattr(torch.jit, '_script_pdt'):
                     self.model = torch.jit._script_pdt(self.model, example_inputs=[self.example_inputs, ])
@@ -60,11 +65,12 @@ class Model(BenchmarkModel):
             optimizer.step()
 
     def eval(self, niter=1):
-        model = self.eval_model
-        example_inputs = self.example_inputs
-        example_inputs = example_inputs[0]
-        for i in range(niter):
-            model(example_inputs)
+        with torch.no_grad():
+            model = self.eval_model
+            example_inputs = self.example_inputs
+            example_inputs = example_inputs[0]
+            for i in range(niter):
+                model(example_inputs)
 
 
 if __name__ == "__main__":
