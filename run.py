@@ -130,6 +130,7 @@ if __name__ == "__main__":
     parser.add_argument("-d", "--device", choices=["cpu", "cuda"], default="cpu", help="Which device to use.")
     parser.add_argument("-m", "--mode", choices=["eager", "jit"], default="eager", help="Which mode to run.")
     parser.add_argument("-t", "--test", choices=["eval", "train"], default="eval", help="Which test to run.")
+    parser.add_argument("--fuser", help="Use one of the available fusers: te, old, nvfuser", default="te", choices=["te", "old", "nvfuser", "llga"])
     parser.add_argument("--profile", action="store_true", help="Run the profiler around the function")
     parser.add_argument("--profile-folder", default="./logs", help="Save profiling model traces to this directory.")
     parser.add_argument("--profile-detailed", action="store_true",
@@ -160,14 +161,14 @@ if __name__ == "__main__":
     if args.bs:
         try:
             if args.test == "eval":
-                m = Model(device=args.device, jit=(args.mode == "jit"), eval_bs=args.bs)
+                m = Model(device=args.device, jit=(args.mode == "jit"), fuser=args.fuser, eval_bs=args.bs)
             elif args.test == "train":
                 m = Model(device=args.device, jit=(args.mode == "jit"), train_bs=args.bs)
         except:
             print(f"The model {args.model} doesn't support specifying batch size, please remove --bs argument in the commandline.")
             exit(1)
     else:
-        m = Model(device=args.device, jit=(args.mode == "jit"))
+        m = Model(device=args.device, jit=(args.mode == "jit"), fuser=args.fuser)
 
     test = getattr(m, args.test)
 
