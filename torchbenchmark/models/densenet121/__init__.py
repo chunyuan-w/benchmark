@@ -30,9 +30,6 @@ class Model(BenchmarkModel):
                     self.model = torch.jit.trace(self.model, self.example_inputs)
                     self.eval_model.eval()
                     self.eval_model = torch.jit.trace(self.eval_model, self.example_inputs)
-                    # warm up
-                    self.eval_model(*self.example_inputs)
-                    self.eval_model(*self.example_inputs)
             else:
                 if hasattr(torch.jit, '_script_pdt'):
                     self.model = torch.jit._script_pdt(self.model, example_inputs=[self.example_inputs, ])
