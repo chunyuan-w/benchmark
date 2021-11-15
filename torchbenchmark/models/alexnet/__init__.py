@@ -26,10 +26,9 @@ class Model(BenchmarkModel):
         if self.jit:
             if fuser == "llga":
                 torch.jit.enable_onednn_fusion(True)
-                with torch.no_grad():
-                    self.model = torch.jit.trace(self.model, self.example_inputs)
-                    self.eval_model = torch.jit.trace(self.eval_model, self.infer_example_inputs)
-                    self.eval_model.eval()
+                self.model = torch.jit.trace(self.model, self.example_inputs)
+                self.eval_model = torch.jit.trace(self.eval_model, self.infer_example_inputs)
+                self.eval_model.eval()
             else:
                 if hasattr(torch.jit, '_script_pdt'):
                     self.model = torch.jit._script_pdt(self.model, example_inputs=[self.example_inputs, ])
@@ -65,9 +64,8 @@ class Model(BenchmarkModel):
     def eval(self, niter=1):
         model = self.eval_model
         example_inputs = self.infer_example_inputs
-        with torch.no_grad():
-            for i in range(niter):
-                model(*example_inputs)
+        for i in range(niter):
+            model(*example_inputs)
 
 
 if __name__ == "__main__":
