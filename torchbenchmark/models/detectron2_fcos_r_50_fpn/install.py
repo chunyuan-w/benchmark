@@ -1,4 +1,6 @@
 import os
+import sys
+sys.path.insert(0, "/home/chunyuan/inductor-ipex/benchmark")
 from torchbenchmark.util.framework.detectron2 import install_detectron2
 
 MODEL_NAME = os.path.basename(os.path.dirname(os.path.abspath(__file__)))
